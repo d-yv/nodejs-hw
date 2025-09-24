@@ -2,6 +2,7 @@ import express from 'express';
 import 'dotenv/config';
 import cors from 'cors';
 import pino from 'pino-http';
+import { connectMongoDB } from './db/connectMongoDB.js';
 
 const PORT = process.env.PORT || 3030;
 const app = express();
@@ -48,6 +49,8 @@ app.use((err, req, res, next) => {
     message: 'Simulated server error',
   });
 });
+
+connectMongoDB();
 
 app.listen(PORT, () => {
   console.log(`server is running on port  ${PORT}`);
