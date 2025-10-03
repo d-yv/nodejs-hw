@@ -2,7 +2,7 @@ import createHttpError from 'http-errors';
 import { Note } from '../models/note.js';
 import mongoose from 'mongoose';
 
-export const getNotes = async (req, res, next) => {
+export const getAllNotes = async (req, res, next) => {
   try {
     const notes = await Note.find();
     res.status(200).json(notes);
