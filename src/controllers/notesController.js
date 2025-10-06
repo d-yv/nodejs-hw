@@ -1,11 +1,27 @@
 import createHttpError from 'http-errors';
 import { Note } from '../models/note.js';
-import mongoose from 'mongoose';
 
 export const getAllNotes = async (req, res, next) => {
   try {
-    const notes = await Note.find();
-    res.status(200).json(notes);
+    const page = Number(req.query.page) || 1;
+    const perPage = Number(req.query.perPage) || 10;
+    const skip = (page - 1) * perPage;
+
+    const notesQuery = Note.find();
+
+    const [totalNotes, notes] = await Promise.all([
+      notesQuery.clone().countDocuments(),
+      notesQuery.skip(skip).limit(perPage),
+    ]);
+    const totalPages = Math.ceil(totalNotes / perPage);
+
+    res.status(200).json({
+      page,
+      perPage,
+      totalNotes,
+      totalPages,
+      notes,
+    });
   } catch (err) {
     next(err);
   }
@@ -14,10 +30,6 @@ export const getAllNotes = async (req, res, next) => {
 export const getNoteById = async (req, res, next) => {
   try {
     const { noteId } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(noteId)) {
-      return next(createHttpError(400, 'Invalid note id'));
-    }
 
     const note = await Note.findOne({ _id: noteId });
 
@@ -44,10 +56,6 @@ export const deleteNote = async (req, res, next) => {
   try {
     const { noteId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(noteId)) {
-      return next(createHttpError(400, 'Invalid note id'));
-    }
-
     const note = await Note.findOneAndDelete({ _id: noteId });
 
     if (!note) {
@@ -63,10 +71,6 @@ export const deleteNote = async (req, res, next) => {
 export const updateNote = async (req, res, next) => {
   try {
     const { noteId } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(noteId)) {
-      return next(createHttpError(400, 'Invalid note id'));
-    }
 
     const note = await Note.findOneAndUpdate({ _id: noteId }, req.body, {
       new: true,
