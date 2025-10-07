@@ -5,9 +5,18 @@ export const getAllNotes = async (req, res, next) => {
   try {
     const page = Number(req.query.page) || 1;
     const perPage = Number(req.query.perPage) || 10;
+    const { tag, search } = req.query;
     const skip = (page - 1) * perPage;
 
     const notesQuery = Note.find();
+
+    if (tag) {
+      notesQuery.where('tag').equals(tag);
+    }
+    if (search) {
+      const regex = new RegExp(search, 'i');
+      notesQuery.or([{ title: regex }, { content: regex }]);
+    }
 
     const [totalNotes, notes] = await Promise.all([
       notesQuery.clone().countDocuments(),
