@@ -15,13 +15,6 @@ export const createSession = async (userId) => {
   });
 };
 
-// res.cookie('CookieName', 777, {
-//   httpOnly: true,
-//   secure: true,
-//   sameSite: 'none',
-//   maxAge: 10 * 60 * 1000,
-// });
-
 export const setSessionCookies = (res, session) => {
   res.cookie('accessToken', session.accessToken, {
     httpOnly: true,
