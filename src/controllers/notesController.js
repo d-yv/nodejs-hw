@@ -14,8 +14,7 @@ export const getAllNotes = async (req, res, next) => {
       notesQuery.where('tag').equals(tag);
     }
     if (search) {
-      const regex = new RegExp(search, 'i');
-      notesQuery.or([{ title: regex }, { content: regex }]);
+      notesQuery.find({ $text: { $search: search } });
     }
 
     const [totalNotes, notes] = await Promise.all([

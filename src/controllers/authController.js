@@ -9,7 +9,7 @@ export const registerUser = async (req, res, next) => {
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    return next(createHttpError(400, 'Email allready used'));
+    return next(createHttpError(400, 'Email already used'));
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -30,12 +30,12 @@ export const loginUser = async (req, res, next) => {
 
   const user = await User.findOne({ email });
   if (!user) {
-    throw next(createHttpError(401, 'Invalid email or password'));
+    return next(createHttpError(401, 'Invalid email or password'));
   }
 
   const isValidPassword = await bcrypt.compare(password, user.password);
   if (!isValidPassword) {
-    throw next(createHttpError(401, 'Invalid email or password'));
+    return next(createHttpError(401, 'Invalid email or password'));
   }
 
   await Session.deleteOne({ userId: user._id });
