@@ -8,7 +8,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendMail = async (options) => {
+export const sendEmail = async (options) => {
   try {
     return await transporter.sendMail({ ...options });
   } catch (error) {

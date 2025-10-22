@@ -4,11 +4,10 @@ import bcrypt from 'bcrypt';
 import { createSession, setSessionCookies } from '../services/auth.js';
 import { Session } from '../models/session.js';
 import jwt from 'jsonwebtoken';
-import { sendMail } from '../utils/sendMail.js';
+import { sendEmail } from '../utils/sendMail.js';
 import handlebars from 'handlebars';
 import path from 'node:path';
 import fs from 'node:fs/promises';
-
 
 export const registerUser = async (req, res, next) => {
   const { email, password } = req.body;
@@ -31,7 +30,6 @@ export const registerUser = async (req, res, next) => {
   res.status(201).json({ newUser });
 };
 
-
 export const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -52,7 +50,6 @@ export const loginUser = async (req, res, next) => {
   res.status(200).json(user);
 };
 
-
 export const logoutUser = async (req, res) => {
   const { sessionId } = req.cookies;
   if (sessionId) {
@@ -64,7 +61,6 @@ export const logoutUser = async (req, res) => {
 
   res.status(204).send();
 };
-
 
 export const refreshUserSession = async (req, res, next) => {
   const session = await Session.findOne({
@@ -96,15 +92,12 @@ export const refreshUserSession = async (req, res, next) => {
   });
 };
 
-
 export const requestResetEmail = async (req, res, next) => {
   const { email } = req.body;
 
   const user = await User.findOne({ email });
   if (!user) {
-    return next(
-      createHttpError(200, 'Password reset email sent (if user exists)'),
-    );
+    return next(createHttpError(404, 'User not found'));
   }
   const resetToken = jwt.sign(
     { sub: user._id, email },
@@ -121,7 +114,7 @@ export const requestResetEmail = async (req, res, next) => {
   });
 
   try {
-    await sendMail({
+    await sendEmail({
       from: process.env.SMTP_FROM,
       to: email,
       subject: 'Reset your password',
@@ -138,7 +131,6 @@ export const requestResetEmail = async (req, res, next) => {
     message: 'Password reset email sent (if user exists)',
   });
 };
-
 
 export const resetPassword = async (req, res, next) => {
   const { token, password } = req.body;
@@ -164,5 +156,5 @@ export const resetPassword = async (req, res, next) => {
 
   res
     .status(200)
-    .json({ meessage: 'Password reset succesfully, please relogin' });
+    .json({ message: 'Password reset succesfully, please relogin' });
 };
